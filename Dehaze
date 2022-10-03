@@ -93,7 +93,7 @@ while True:
     if success == False:
         break
 
-    frame = cv2.resize(frame, (480, 282))
+    frame = cv2.resize(frame, (360, 211))
 
     J = dehaze(frame, 5, n=8)
     frame = cv2.resize(frame, (frameWidth, frameHeight))
