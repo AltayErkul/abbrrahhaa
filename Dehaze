@@ -2,13 +2,13 @@ import cv2
 import math
 import numpy as np
 import time
-
+import torch
 
 fps_start = 0
 fps =0
 
 frameWidth = 720
-frameHeight = 423
+frameHeight = 480
 
 def Dark_channel(img, r):
     win_size = 2 * r + 1
@@ -92,6 +92,8 @@ while True:
     success, frame = cap.read()
     if success == False:
         break
+
+    frame = cv2.resize(frame, (480, 282))
 
     J = dehaze(frame, 5, n=8)
     frame = cv2.resize(frame, (frameWidth, frameHeight))
