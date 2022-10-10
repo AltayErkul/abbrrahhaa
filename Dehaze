@@ -2,13 +2,22 @@ import cv2
 import math
 import numpy as np
 import time
-import torch
+
 
 fps_start = 0
 fps =0
 
-frameWidth = 720
-frameHeight = 480
+frameWidth = 760
+frameHeight = 447
+
+def nothing(x):
+    pass
+
+cv2.namedWindow("Trackbar")
+cv2.createTrackbar("r", "Trackbar", 8, 50, nothing)
+cv2.createTrackbar("n", "Trackbar", 8, 50, nothing)
+cv2.createTrackbar("w", "Trackbar", 200, 1980, nothing)
+cv2.createTrackbar("h", "Trackbar", 100, 1360, nothing)
 
 def Dark_channel(img, r):
     win_size = 2 * r + 1
@@ -66,7 +75,7 @@ def Guided_filter(I, p, r, eps):
 
     return q
 
-def dehaze(img, r, n=20, thre=0.001, eps=0.001, omega=0.9):
+def dehaze(img, r, n, thre=0.01, eps=0.01, omega=0.9):
     # img_pro = img.astype('float64')/255
     img_pro = np.float64(img) / 255
     J_dark = Dark_channel(img_pro, r)
@@ -93,11 +102,19 @@ while True:
     if success == False:
         break
 
-    frame = cv2.resize(frame, (360, 211))
+    r = cv2.getTrackbarPos("r", "Trackbar")
+    n = cv2.getTrackbarPos("n", "Trackbar")
+    w = cv2.getTrackbarPos("w", "Trackbar")
+    h = cv2.getTrackbarPos("h", "Trackbar")
 
-    J = dehaze(frame, 5, n=8)
+    frame = cv2.resize(frame, (w, h))
+
+    J = dehaze(frame, r, n)
     frame = cv2.resize(frame, (frameWidth, frameHeight))
     J = cv2.resize(J, (frameWidth, frameHeight))
+
+    frame = cv2.flip(frame, 1)
+    J = cv2.flip(J, 1)
 
     fps_end = time.time()
     time_diff = fps_end - fps_start
@@ -105,12 +122,16 @@ while True:
     fps_start = fps_end
     fps_text = "FPS:{:.2f}".format(fps)
 
-    frame = cv2.flip(frame, 1)
-    J = cv2.flip(J, 1)
+
+
+
     cv2.putText(J, fps_text, (5, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 100), 2)
     cv2.imshow('Original Hazy', frame)
     cv2.imshow('Haze removed', J)
 
     if cv2.waitKey(1) & 0xFF == ord("q"):
         break
+
 cap.release()
+
+cv2.destroyAllWindows()
